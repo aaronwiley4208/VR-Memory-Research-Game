@@ -7,17 +7,20 @@ public class CardShuffle : MonoBehaviour {
 	public int patternSize = 6;
     public float lightTime = 1;
     float timer = 0;
-	Transform[] cards;
+    Transform[] cards;
+
+    List<string> originalPattern = new List<string>();
     List<int> solutionPattern = new List<int>();
-    int[] selectionStatistics;
     List<int> pattern = new List<int>();//positions
     List<string> patNames = new List<string>();//names of objects
+
+    Dictionary<string, int> cardMap = new Dictionary<string, int>(); // Holds the cards positions updated when they get shuffled
+
+    int[] selectionStatistics;
     int iterator = 0;
     int patternSelectionCount = 0;
 
     public Camera mainCamera;
-
-    Dictionary<string, int> patternMap = new Dictionary<string, int>();
 
 
 	void Start () {
@@ -82,6 +85,7 @@ public class CardShuffle : MonoBehaviour {
             cards[rnd] = cards[i];
             cards[i] = tempGO;
         }
+        mapCards();
         for (int i = 1; i <= 5; i++)
         {//row 1
             cards[i].localPosition = new Vector3(-6 + (i * 2), 4, cards[i].localPosition.z);
@@ -106,16 +110,17 @@ public class CardShuffle : MonoBehaviour {
     }
 
 	void CreatePat(){
-        while(pattern.ToArray().Length != patternSize){ 
-			int ranNum = Random.Range(1, 26);
+        while (pattern.ToArray().Length != patternSize)
+        {
+            int ranNum = Random.Range(1, 26);
             if (!pattern.Contains(ranNum))
             {
                 pattern.Add(ranNum);
-            }           
-		}
+            }
+        }
         foreach (int num in pattern) {
             patNames.Add(cards[num].GetComponent<Transform>().name);
-            patternMap.Add(cards[num].GetComponent<Transform>().name, num);
+            originalPattern.Add(cards[num].GetComponent<Transform>().name);
         }
 
     }
@@ -132,38 +137,24 @@ public class CardShuffle : MonoBehaviour {
         if (Physics.Raycast(ray, out hit))
         {
             //Debug.Log(hit.collider.gameObject.name);
-            string hitObjectName = hit.transform.name;
+            string hitObjectName = hit.collider.gameObject.name;
             Debug.Log(hitObjectName);
 
-            //If the object found is a card and we have not fully selected a pattern sequence yet
-            if (patternMap.ContainsKey(hitObjectName))
+    
+            int cardNum;
+            int cardPos;
+
+            // Don't allow anymore selections after they all have been completed
+            if (patternSelectionCount < patternSize)
             {
-                if (patternSelectionCount != patternSize)
+                try
                 {
-                    //Build a solution list
-                    patternSelectionCount++;
-                    Debug.Log("Selection Count: " + patternSelectionCount);
-                    int patternNumber;
-                    patternMap.TryGetValue(hitObjectName, out patternNumber);
-                    solutionPattern.Add(patternNumber);
-
-                    //If we have all the required selections then check the solution
-                    if (patternSelectionCount == patternSize)
-                    {
-                        //Store the array containing the hits and misses and we can do something with it later if need be.
-                        selectionStatistics = checkSolution();
-
-                    }
-                }
-                
-            }
-            else
-            {
-                int cardNum;
-                try {
+                    // get tthe card number and add it to the solution and light up corresponding light
                     System.Int32.TryParse(hitObjectName.Split(new string[] { "Card" }, System.StringSplitOptions.None)[1], out cardNum);
                     patternSelectionCount++;
                     Debug.Log("Selection Count: " + patternSelectionCount);
+                    cardMap.TryGetValue(hitObjectName, out cardPos);
+                    cards[cardPos].GetComponent<Light>().enabled = true;
                     solutionPattern.Add(cardNum);
 
                     //If we have all the required selections then check the solution
@@ -174,37 +165,38 @@ public class CardShuffle : MonoBehaviour {
 
                     }
                 }
-                catch(System.IndexOutOfRangeException e)
+
+                //If we didn't hit a card don't allow a hit
+                catch (System.IndexOutOfRangeException e)
                 {
                     Debug.Log("Didn't hit a card.");
                 }
-
             }
-
-
-
-
 
         }
     }
 
     int[] checkSolution()
     {
+
+        //Checking for solution one by one here we could just change this to say it was correct or incorrect depends on what we want to do
         int[] array = new int[2];
         int hits = 0;
         int misses = 0;
 
         for (int i = 0; i < patternSize; i++)
         {
-            if (pattern[i].Equals(solutionPattern[i])){
-                Debug.Log("Pattern: " + pattern[i] + "|  SP: " + solutionPattern[i]);
+
+
+            if (("Card" + solutionPattern[i]).Equals(originalPattern[i])){
+                Debug.Log("OP: " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
                 hits++;
 
             }
             else
             {
                 misses++;
-                Debug.Log("Pattern: " + pattern[i] + "|  SP: " + solutionPattern[i]);
+                Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
             }
 
         }
@@ -219,8 +211,45 @@ public class CardShuffle : MonoBehaviour {
     }
 
     public void ButtonShuffle() {
+        resetAndClear();
         Shuffle();
         iterator = 0;
         CreatePat();
+    }
+
+
+   void resetAndClear()
+    {
+        //Reset the pattern selection count
+        patternSelectionCount = 0;
+
+        //Cut off all the lights that are on before the next go around.
+        try
+        {
+            int cardNum;
+            for (int i=0; i< solutionPattern.Count; i++)
+            {
+                cardMap.TryGetValue(("Card" + solutionPattern[i]), out cardNum);
+                cards[cardNum].GetComponent<Light>().enabled = false;
+            }
+        } catch (System.ArgumentOutOfRangeException e)
+        {
+
+        }
+
+        //clear solution and pattern lists
+        solutionPattern.Clear();
+        originalPattern.Clear();
+
+    }
+
+    //Build a map of the card names to their current positions;
+    void mapCards() { 
+            for(int i = 0; i < cards.Length; i++)
+        {
+
+            cardMap[cards[i].name] = i;
+
+        }
     }
 }
