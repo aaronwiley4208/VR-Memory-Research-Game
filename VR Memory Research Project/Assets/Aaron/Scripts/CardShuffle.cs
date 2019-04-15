@@ -5,9 +5,10 @@ using UnityEngine;
 public class CardShuffle : MonoBehaviour {
 
 	public int patternSize = 6;
+    public float lightTime = 1;
 	Transform[] cards;
-	int[] pattern;
-
+    List<int> pattern = new List<int>();
+    float timer;
 
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
@@ -34,18 +35,32 @@ public class CardShuffle : MonoBehaviour {
 		for(int i = 1; i <= 5; i++){//row 5
 			cards[20+i].localPosition = new Vector3 (-6 + (i * 2), -4, cards[20+i].localPosition.z);
 		}
+        CreatePat();
+        foreach (int str in pattern) {
+            print(str);
+        }
+
 	}
 
 	void Update () {
-		
+
+		foreach (int num in pattern) {
+            timer = lightTime;
+            timer -= Time.deltaTime;
+            if(timer > 0)
+                cards[num].GetComponent<Light>().enabled = true;
+            if (timer < 0)
+                cards[num].GetComponent<Light>().enabled = false;
+        }
+
 	}
 
-	void lightPat(){
-		pattern = new int[patternSize];
-		for(int i = 0; i < patternSize; i++){
-			int ranNum = Random.Range(1, 25);
-
-				pattern[i] = ranNum;
+	void CreatePat(){
+        while(pattern.ToArray().Length != patternSize){ 
+			int ranNum = Random.Range(1, 26);
+            if (!pattern.Contains(ranNum))
+                pattern.Add(ranNum);                
 		}
+        
 	}
 }
