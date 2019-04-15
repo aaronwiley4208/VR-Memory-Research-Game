@@ -14,12 +14,12 @@ public class CardShuffle : MonoBehaviour {
     List<int> solutionPattern = new List<int>();
     int[] selectionStatistics;
 
-    int itertor = 0;
+    int iterator = 0;
     int patternSelectionCount = 0;
 
     public Camera mainCamera;
 
-    Dictionary<Vector3, int> patternMap = new Dictionary<Vector3, int>();
+    Dictionary<string, int> patternMap = new Dictionary<string, int>();
 
 
 	void Start () {
@@ -112,11 +112,11 @@ public class CardShuffle : MonoBehaviour {
             if (!pattern.Contains(ranNum))
             {
                 pattern.Add(ranNum);
-                patternMap.Add(cards[ranNum].localPosition, ranNum);
             }           
 		}
         foreach (int num in pattern) {
             patNames.Add(cards[num].GetComponent<Transform>().name);
+            patternMap.Add(cards[num].GetComponent<Transform>().name, num);
         }
 
     }
@@ -124,6 +124,8 @@ public class CardShuffle : MonoBehaviour {
 
     void getClickedObjectPosition()
     {
+
+        // Replace logic with wand stuff later
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit hit = new RaycastHit();
@@ -131,32 +133,57 @@ public class CardShuffle : MonoBehaviour {
         if (Physics.Raycast(ray, out hit))
         {
             //Debug.Log(hit.collider.gameObject.name);
-
-            Vector3 objectHitPosition = hit.transform.localPosition;
+            string hitObjectName = hit.transform.name;
+            Debug.Log(hitObjectName);
 
             //If the object found is a card and we have not fully selected a pattern sequence yet
-            if (patternMap.ContainsKey(objectHitPosition) && patternSelectionCount != patternSize)
+            if (patternMap.ContainsKey(hitObjectName))
             {
-                Debug.Log("PatternSize = " + patternSize);
-                //Build a solution list
-                patternSelectionCount++;
-                Debug.Log("Selection Count: " + patternSelectionCount);
-                int patternNumber;
-                patternMap.TryGetValue(objectHitPosition, out patternNumber);
-                solutionPattern.Add(patternNumber);
-
-                //If we have all the required selections then check the solution
-                if (patternSelectionCount == patternSize)
+                if (patternSelectionCount != patternSize)
                 {
+                    //Build a solution list
+                    patternSelectionCount++;
+                    Debug.Log("Selection Count: " + patternSelectionCount);
+                    int patternNumber;
+                    patternMap.TryGetValue(hitObjectName, out patternNumber);
+                    solutionPattern.Add(patternNumber);
 
-                    selectionStatistics = checkSolution();
+                    //If we have all the required selections then check the solution
+                    if (patternSelectionCount == patternSize)
+                    {
+                        //Store the array containing the hits and misses and we can do something with it later if need be.
+                        selectionStatistics = checkSolution();
 
+                    }
                 }
-
                 
             }
+            else
+            {
+                int cardNum;
+                try {
+                    System.Int32.TryParse(hitObjectName.Split(new string[] { "Card" }, System.StringSplitOptions.None)[1], out cardNum);
+                    patternSelectionCount++;
+                    Debug.Log("Selection Count: " + patternSelectionCount);
+                    solutionPattern.Add(cardNum);
 
-           
+                    //If we have all the required selections then check the solution
+                    if (patternSelectionCount == patternSize)
+                    {
+                        //Store the array containing the hits and misses and we can do something with it later if need be.
+                        selectionStatistics = checkSolution();
+
+                    }
+                }
+                catch(System.IndexOutOfRangeException e)
+                {
+                    Debug.Log("Didn't hit a card.");
+                }
+
+            }
+
+
+
 
 
         }
@@ -171,13 +198,14 @@ public class CardShuffle : MonoBehaviour {
         for (int i = 0; i < patternSize; i++)
         {
             if (pattern[i].Equals(solutionPattern[i])){
-
+                Debug.Log("Pattern: " + pattern[i] + "|  SP: " + solutionPattern[i]);
                 hits++;
 
             }
             else
             {
                 misses++;
+                Debug.Log("Pattern: " + pattern[i] + "|  SP: " + solutionPattern[i]);
             }
 
         }
@@ -186,6 +214,7 @@ public class CardShuffle : MonoBehaviour {
         array[1] = misses;
 
         Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
+
 
         return array;
     }
