@@ -8,9 +8,18 @@ public class CardShuffle : MonoBehaviour {
     public float lightTime = 1;
     float timer = 0;
 	Transform[] cards;
+
     List<int> pattern = new List<int>();
     List<string> patNames = new List<string>();
+    List<int> solutionPattern = new List<int>();
+    int[] selectionStatistics;
+
     int itertor = 0;
+    int patternSelectionCount = 0;
+
+    public Camera mainCamera;
+
+    Dictionary<Vector3, int> patternMap = new Dictionary<Vector3, int>();
 
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
@@ -42,7 +51,15 @@ public class CardShuffle : MonoBehaviour {
             }
         }
 
-	}
+        if (Input.GetMouseButtonDown(0))
+        {
+
+            getClickedObjectPosition();
+        }
+
+     
+
+    }
 
     void Shuffle() {
         Transform tempGO;
@@ -80,12 +97,84 @@ public class CardShuffle : MonoBehaviour {
         while(pattern.ToArray().Length != patternSize){ 
 			int ranNum = Random.Range(1, 26);
             if (!pattern.Contains(ranNum))
-                pattern.Add(ranNum);                
+            {
+                pattern.Add(ranNum);
+                patternMap.Add(cards[ranNum].localPosition, ranNum);
+            }           
 		}
         foreach (int num in pattern) {
             patNames.Add(cards[num].GetComponent<Transform>().name);
         }
 
+    }
+
+
+    void getClickedObjectPosition()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+
+        RaycastHit hit = new RaycastHit();
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            //Debug.Log(hit.collider.gameObject.name);
+
+            Vector3 objectHitPosition = hit.transform.localPosition;
+
+            //If the object found is a card and we have not fully selected a pattern sequence yet
+            if (patternMap.ContainsKey(objectHitPosition) && patternSelectionCount != patternSize)
+            {
+                Debug.Log("PatternSize = " + patternSize);
+                //Build a solution list
+                patternSelectionCount++;
+                Debug.Log("Selection Count: " + patternSelectionCount);
+                int patternNumber;
+                patternMap.TryGetValue(objectHitPosition, out patternNumber);
+                solutionPattern.Add(patternNumber);
+
+                //If we have all the required selections then check the solution
+                if (patternSelectionCount == patternSize)
+                {
+
+                    selectionStatistics = checkSolution();
+
+                }
+
+                
+            }
+
+           
+
+
+        }
+    }
+
+    int[] checkSolution()
+    {
+        int[] array = new int[2];
+        int hits = 0;
+        int misses = 0;
+
+        for (int i = 0; i < patternSize; i++)
+        {
+            if (pattern[i].Equals(solutionPattern[i])){
+
+                hits++;
+
+            }
+            else
+            {
+                misses++;
+            }
+
+        }
+
+        array[0] = hits;
+        array[1] = misses;
+
+        Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
+
+        return array;
     }
 
 
