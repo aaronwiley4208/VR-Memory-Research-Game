@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CardShuffle : MonoBehaviour {
 
@@ -20,14 +21,27 @@ public class CardShuffle : MonoBehaviour {
     int iterator = 0;
     int patternSelectionCount = 0;
 
+	bool allowEdit;
+
+	public Text score1;
+	public Text score2;
+	public Text score3;
+	public Text score4;
+	public Text score5;
+	public Text completeTxt;
+	bool completeCheck = false;
+
+	public int roundCount = 5;
+
+
     public Camera mainCamera;
 
 
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
-
+		allowEdit = false;
         ButtonShuffle();
-        
+
 
         /*foreach (int str in pattern) {
             print(str);
@@ -47,7 +61,6 @@ public class CardShuffle : MonoBehaviour {
             {
                 cards[pattern[iterator]].GetComponent<Light>().enabled = true;
                 timer = 0;
-                //print(pattern[iterator]);
                 iterator++;
             }
         }
@@ -61,15 +74,19 @@ public class CardShuffle : MonoBehaviour {
                 }
                 timer = 0;
                 iterator++;
+				allowEdit = true;
                 Shuffle();
+
             }
             
-        }
+		}
+
 
         if (Input.GetMouseButtonDown(0))
         {
-
-            getClickedObjectPosition();
+			if(allowEdit)
+            	getClickedObjectPosition();
+			
         }
 
      
@@ -138,7 +155,7 @@ public class CardShuffle : MonoBehaviour {
         {
             //Debug.Log(hit.collider.gameObject.name);
             string hitObjectName = hit.collider.gameObject.name;
-            Debug.Log(hitObjectName);
+            //Debug.Log(hitObjectName);
 
     
             int cardNum;
@@ -161,8 +178,7 @@ public class CardShuffle : MonoBehaviour {
                     if (patternSelectionCount == patternSize)
                     {
                         //Store the array containing the hits and misses and we can do something with it later if need be.
-                        selectionStatistics = checkSolution();
-
+						checkSolution();
                     }
                 }
 
@@ -176,7 +192,7 @@ public class CardShuffle : MonoBehaviour {
         }
     }
 
-    int[] checkSolution()
+    void checkSolution()
     {
 
         //Checking for solution one by one here we could just change this to say it was correct or incorrect depends on what we want to do
@@ -204,10 +220,26 @@ public class CardShuffle : MonoBehaviour {
         array[0] = hits;
         array[1] = misses;
 
-        Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
+        //Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
+		if(roundCount == 0)
+			score1.text = "Hits = " + array[0] + "Misses = " + array[1];
+		if(roundCount == 1)
+			score2.text = "Hits = " + array[0] + "Misses = " + array[1];
+		if(roundCount == 2)
+			score3.text = "Hits = " + array[0] + "Misses = " + array[1];
+		if(roundCount == 3)
+			score4.text = "Hits = " + array[0] + "Misses = " + array[1];
+		if(roundCount == 4)
+			score5.text = "Hits = " + array[0] + "Misses = " + array[1];
+		if (roundCount >= 4) {
+			completeTxt.text = "Complete";
+			completeCheck = true;
+		}
+			
 
+		RoundShuffle ();
 
-        return array;
+        
     }
 
     public void ButtonShuffle() {
@@ -215,8 +247,19 @@ public class CardShuffle : MonoBehaviour {
         Shuffle();
         iterator = 0;
         CreatePat();
+		roundCount = 0;
     }
 
+	void RoundShuffle(){
+		if(completeCheck == false){
+			resetAndClear();
+			Shuffle();
+			iterator = 0;
+			CreatePat();
+			roundCount++;
+		}
+
+	}
 
    void resetAndClear()
     {
@@ -236,7 +279,7 @@ public class CardShuffle : MonoBehaviour {
         {
 
         }
-
+		allowEdit = false;
         //clear solution and pattern lists
         solutionPattern.Clear();
         originalPattern.Clear();
