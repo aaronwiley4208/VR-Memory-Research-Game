@@ -21,6 +21,7 @@ public class CardShuffle : MonoBehaviour {
 
     Dictionary<Vector3, int> patternMap = new Dictionary<Vector3, int>();
 
+
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
 
@@ -29,26 +30,38 @@ public class CardShuffle : MonoBehaviour {
 
         /*foreach (int str in pattern) {
             print(str);
-        }
+        }*/
         foreach (string str in patNames)
         {
             print(str);
-        }*/
+        }
     }
 
 	void Update () {
-        if (itertor < patternSize){
+
+        if (iterator < patternSize)
+        {
             timer += Time.deltaTime;
-            if (timer >= lightTime){
-                cards[pattern[itertor]].GetComponent<Light>().enabled = true;
+            if (timer >= lightTime)
+            {
+                cards[pattern[iterator]].GetComponent<Light>().enabled = true;
                 timer = 0;
+                print(pattern[iterator]);
+                iterator++;
             }
+        }
+        else if(iterator == patternSize){
             timer += Time.deltaTime;
-            if (timer >= lightTime){
-                cards[pattern[itertor]].GetComponent<Light>().enabled = false;
+            if (timer >= lightTime)
+            {
+                foreach (int num in pattern)
+                {
+                    cards[num].GetComponent<Light>().enabled = false;
+                }
                 timer = 0;
-                itertor++;
+                iterator++;
             }
+            
         }
 
         if (Input.GetMouseButtonDown(0))
