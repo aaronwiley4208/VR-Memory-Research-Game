@@ -8,12 +8,10 @@ public class CardShuffle : MonoBehaviour {
     public float lightTime = 1;
     float timer = 0;
 	Transform[] cards;
-
-    List<int> pattern = new List<int>();
-    List<string> patNames = new List<string>();
     List<int> solutionPattern = new List<int>();
     int[] selectionStatistics;
-
+    List<int> pattern = new List<int>();//positions
+    List<string> patNames = new List<string>();//names of objects
     int iterator = 0;
     int patternSelectionCount = 0;
 
@@ -25,16 +23,16 @@ public class CardShuffle : MonoBehaviour {
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
 
-        Shuffle();
-        CreatePat();
+        ButtonShuffle();
+        
 
         /*foreach (int str in pattern) {
             print(str);
-        }*/
+        }
         foreach (string str in patNames)
         {
             print(str);
-        }
+        }*/
     }
 
 	void Update () {
@@ -46,7 +44,7 @@ public class CardShuffle : MonoBehaviour {
             {
                 cards[pattern[iterator]].GetComponent<Light>().enabled = true;
                 timer = 0;
-                print(pattern[iterator]);
+                //print(pattern[iterator]);
                 iterator++;
             }
         }
@@ -60,6 +58,7 @@ public class CardShuffle : MonoBehaviour {
                 }
                 timer = 0;
                 iterator++;
+                Shuffle();
             }
             
         }
@@ -83,7 +82,6 @@ public class CardShuffle : MonoBehaviour {
             cards[rnd] = cards[i];
             cards[i] = tempGO;
         }
-
         for (int i = 1; i <= 5; i++)
         {//row 1
             cards[i].localPosition = new Vector3(-6 + (i * 2), 4, cards[i].localPosition.z);
@@ -104,6 +102,7 @@ public class CardShuffle : MonoBehaviour {
         {//row 5
             cards[20 + i].localPosition = new Vector3(-6 + (i * 2), -4, cards[20 + i].localPosition.z);
         }
+        
     }
 
 	void CreatePat(){
@@ -219,5 +218,9 @@ public class CardShuffle : MonoBehaviour {
         return array;
     }
 
-
+    public void ButtonShuffle() {
+        Shuffle();
+        iterator = 0;
+        CreatePat();
+    }
 }
