@@ -40,7 +40,11 @@ public class CardShuffle : MonoBehaviour {
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
 		allowEdit = false;
-        ButtonShuffle();
+		resetAndClear();
+		Shuffle();
+		iterator = 0;
+		CreatePat();
+		roundCount = 0;
 
 
         /*foreach (int str in pattern) {
@@ -236,21 +240,32 @@ public class CardShuffle : MonoBehaviour {
 			completeCheck = true;
 		}
 			
+		StartCoroutine (RoundShuffle());
 
-		RoundShuffle ();
+
 
         
     }
 
     public void ButtonShuffle() {
-        resetAndClear();
-        Shuffle();
-        iterator = 0;
-        CreatePat();
-		roundCount = 0;
+		if(allowEdit == true){
+			resetAndClear();
+			Shuffle();
+			iterator = 0;
+			CreatePat();
+			roundCount = 0;
+			score1.text = "";
+			score2.text = "";
+			score3.text = "";
+			score4.text = "";
+			score5.text = "";
+			completeTxt.text = "";
+		}
+        
     }
 
-	void RoundShuffle(){
+	IEnumerator RoundShuffle(){
+		yield return new WaitForSeconds (3f);
 		if(completeCheck == false){
 			resetAndClear();
 			Shuffle();
@@ -280,6 +295,7 @@ public class CardShuffle : MonoBehaviour {
 
         }
 		allowEdit = false;
+
         //clear solution and pattern lists
         solutionPattern.Clear();
         originalPattern.Clear();
