@@ -19,6 +19,8 @@ public class VRShuffle : MonoBehaviour
     }
 
 
+
+
     public int patternSize = 6;
     public float lightTime = 1;
     float timer = 0;
