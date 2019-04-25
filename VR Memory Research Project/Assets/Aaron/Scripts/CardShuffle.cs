@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR;
 
 public class CardShuffle : MonoBehaviour {
 
@@ -36,7 +37,7 @@ public class CardShuffle : MonoBehaviour {
 
     public Camera mainCamera;
 
-
+    
 	void Start () {
 		cards = GetComponentsInChildren<Transform>();
 		allowEdit = false;
@@ -45,7 +46,7 @@ public class CardShuffle : MonoBehaviour {
 		iterator = 0;
 		CreatePat();
 		roundCount = 0;
-
+        XRSettings.enabled = false;
 
         /*foreach (int str in pattern) {
             print(str);

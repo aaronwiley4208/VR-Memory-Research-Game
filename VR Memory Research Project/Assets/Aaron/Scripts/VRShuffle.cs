@@ -2,29 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.VR;
+using Valve.VR;
 
 public class VRShuffle : MonoBehaviour
 {
 
     public SteamVR_Action_Boolean grabPinch;
 
-    void Update()
-    {
-
-        if (grabPinch.GetState(SteamVr_Input_Sources.Any))
-        {
-
-        }
-    }
-
-
-
-
     public int patternSize = 6;
     public float lightTime = 1;
     float timer = 0;
     Transform[] cards;
+
+    public GameObject controller;
+    LineRenderer laser;
 
     List<string> originalPattern = new List<string>();
     List<int> solutionPattern = new List<int>();
@@ -63,6 +54,11 @@ public class VRShuffle : MonoBehaviour
         CreatePat();
         roundCount = 0;
 
+        laser = controller.GetComponent<LineRenderer>();
+        laser.SetWidth(0.01f, 0.01f);
+        laser.SetColors(Color.red, Color.red);
+        laser.material.color = Color.red;
+
 
         /*foreach (int str in pattern) {
             print(str);
@@ -74,7 +70,9 @@ public class VRShuffle : MonoBehaviour
     }
 
     void Update()
-    {
+       {
+
+        
 
         if (iterator < patternSize)
         {
@@ -103,14 +101,35 @@ public class VRShuffle : MonoBehaviour
             }
 
         }
+        if (grabPinch.GetStateDown(SteamVR_Input_Sources.Any)){
 
-
-        if (Input.GetMouseButtonDown(0))
-        {
             if (allowEdit)
                 getClickedObjectPosition();
 
         }
+
+        RaycastHit hit = new RaycastHit();
+        if (Physics.Raycast(controller.transform.position, controller.transform.forward, out hit)) {
+            laser.enabled = true;
+            laser.SetPosition(0, controller.transform.position);
+            laser.SetPosition(1, hit.point);
+        }
+        if (roundCount == 0)
+            score1.text = "Round 1";
+        if (roundCount == 1)
+            score2.text = "Round 2";
+        if (roundCount == 2)
+            score3.text = "Round 3";
+        if (roundCount == 3)
+            score4.text = "Round 4";
+        if (roundCount == 4)
+            score5.text = "Final Round";
+
+        /*if (Input.GetMouseButtonDown(0))
+        {
+            
+
+        }*/
 
 
 
@@ -173,13 +192,18 @@ public class VRShuffle : MonoBehaviour
     {
 
         // Replace logic with wand stuff later
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        
+
+
 
         RaycastHit hit = new RaycastHit();
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(controller.transform.position, controller.transform.forward, out hit))
         {
             //Debug.Log(hit.collider.gameObject.name);
+
+           
+
             string hitObjectName = hit.collider.gameObject.name;
             //Debug.Log(hitObjectName);
 
@@ -195,7 +219,7 @@ public class VRShuffle : MonoBehaviour
                     // get tthe card number and add it to the solution and light up corresponding light
                     System.Int32.TryParse(hitObjectName.Split(new string[] { "Card" }, System.StringSplitOptions.None)[1], out cardNum);
                     patternSelectionCount++;
-                    Debug.Log("Selection Count: " + patternSelectionCount);
+                    //Debug.Log("Selection Count: " + patternSelectionCount);
                     cardMap.TryGetValue(hitObjectName, out cardPos);
                     cards[cardPos].GetComponent<Light>().enabled = true;
                     solutionPattern.Add(cardNum);
@@ -211,10 +235,25 @@ public class VRShuffle : MonoBehaviour
                 //If we didn't hit a card don't allow a hit
                 catch (System.IndexOutOfRangeException e)
                 {
-                    Debug.Log("Didn't hit a card.");
+                    //Debug.Log("Didn't hit a card.");
                 }
             }
-
+            if (hit.transform.name == "Button") {
+                if (allowEdit == true)
+                {
+                    resetAndClear();
+                    Shuffle();
+                    iterator = 0;
+                    CreatePat();
+                    roundCount = 0;
+                    score1.text = "";
+                    score2.text = "";
+                    score3.text = "";
+                    score4.text = "";
+                    score5.text = "";
+                    completeTxt.text = "";
+                }
+            }
         }
     }
 
@@ -232,14 +271,14 @@ public class VRShuffle : MonoBehaviour
 
             if (("Card" + solutionPattern[i]).Equals(originalPattern[i]))
             {
-                Debug.Log("OP: " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
+                //Debug.Log("OP: " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
                 hits++;
 
             }
             else
             {
                 misses++;
-                Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
+                //Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
             }
 
         }
@@ -247,17 +286,9 @@ public class VRShuffle : MonoBehaviour
         array[0] = hits;
         array[1] = misses;
 
-        //Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
-        if (roundCount == 0)
-            score1.text = "Hits = " + array[0] + "Misses = " + array[1];
-        if (roundCount == 1)
-            score2.text = "Hits = " + array[0] + "Misses = " + array[1];
-        if (roundCount == 2)
-            score3.text = "Hits = " + array[0] + "Misses = " + array[1];
-        if (roundCount == 3)
-            score4.text = "Hits = " + array[0] + "Misses = " + array[1];
-        if (roundCount == 4)
-            score5.text = "Hits = " + array[0] + "Misses = " + array[1];
+        roundCount++;
+        Debug.Log("Round " + (roundCount) + ": Hits = " + array[0] + " Misses = " + array[1]);
+        roundCount--;
         if (roundCount >= 4)
         {
             completeTxt.text = "Complete";
@@ -273,20 +304,7 @@ public class VRShuffle : MonoBehaviour
 
     public void ButtonShuffle()
     {
-        if (allowEdit == true)
-        {
-            resetAndClear();
-            Shuffle();
-            iterator = 0;
-            CreatePat();
-            roundCount = 0;
-            score1.text = "";
-            score2.text = "";
-            score3.text = "";
-            score4.text = "";
-            score5.text = "";
-            completeTxt.text = "";
-        }
+        
 
     }
 
