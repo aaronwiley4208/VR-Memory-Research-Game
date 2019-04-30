@@ -30,9 +30,9 @@ public class CardShuffle : MonoBehaviour {
 	public Text score4;
 	public Text score5;
 	public Text completeTxt;
-	bool completeCheck = false;
+	public bool completeCheck = false;
 
-	public int roundCount = 5;
+    public int roundCount = 5;
 
 
     public Camera mainCamera;
