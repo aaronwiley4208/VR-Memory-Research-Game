@@ -94,7 +94,16 @@ public class CardShuffle : MonoBehaviour {
 			
         }
 
-     
+        if(roundCount == 0)
+			score1.text = "Round 1";
+		if(roundCount == 1)
+			score2.text = "Round 2";
+		if(roundCount == 2)
+			score3.text = "Round 3";
+		if(roundCount == 3)
+			score4.text = "Round 4";
+		if(roundCount == 4)
+			score5.text = "Final Round";
 
     }
 
@@ -174,7 +183,7 @@ public class CardShuffle : MonoBehaviour {
                     // get tthe card number and add it to the solution and light up corresponding light
                     System.Int32.TryParse(hitObjectName.Split(new string[] { "Card" }, System.StringSplitOptions.None)[1], out cardNum);
                     patternSelectionCount++;
-                    Debug.Log("Selection Count: " + patternSelectionCount);
+                    //Debug.Log("Selection Count: " + patternSelectionCount);
                     cardMap.TryGetValue(hitObjectName, out cardPos);
                     cards[cardPos].GetComponent<Light>().enabled = true;
                     solutionPattern.Add(cardNum);
@@ -190,7 +199,7 @@ public class CardShuffle : MonoBehaviour {
                 //If we didn't hit a card don't allow a hit
                 catch (System.IndexOutOfRangeException e)
                 {
-                    Debug.Log("Didn't hit a card.");
+                    //Debug.Log("Didn't hit a card.");
                 }
             }
 
@@ -210,14 +219,14 @@ public class CardShuffle : MonoBehaviour {
 
 
             if (("Card" + solutionPattern[i]).Equals(originalPattern[i])){
-                Debug.Log("OP: " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
+                //Debug.Log("OP: " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
                 hits++;
 
             }
             else
             {
                 misses++;
-                Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
+                //Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
             }
 
         }
@@ -225,17 +234,10 @@ public class CardShuffle : MonoBehaviour {
         array[0] = hits;
         array[1] = misses;
 
-        //Debug.Log("Hits = " + array[0] + "Misses = " + array[1]);
-		if(roundCount == 0)
-			score1.text = "Hits = " + array[0] + "Misses = " + array[1];
-		if(roundCount == 1)
-			score2.text = "Hits = " + array[0] + "Misses = " + array[1];
-		if(roundCount == 2)
-			score3.text = "Hits = " + array[0] + "Misses = " + array[1];
-		if(roundCount == 3)
-			score4.text = "Hits = " + array[0] + "Misses = " + array[1];
-		if(roundCount == 4)
-			score5.text = "Hits = " + array[0] + "Misses = " + array[1];
+        roundCount++;
+        Debug.Log("Round " + (roundCount) +": Hits = " + array[0] + " Misses = " + array[1]);
+        roundCount--;
+
 		if (roundCount >= 4) {
 			completeTxt.text = "Complete";
 			completeCheck = true;
