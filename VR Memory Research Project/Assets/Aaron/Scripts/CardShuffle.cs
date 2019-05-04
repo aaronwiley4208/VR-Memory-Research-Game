@@ -29,10 +29,16 @@ public class CardShuffle : MonoBehaviour {
 	public Text score3;
 	public Text score4;
 	public Text score5;
+    public Text score6;
+    public Text score7;
 	public Text completeTxt;
 	public bool completeCheck = false;
 
-    public int roundCount = 5;
+    public GameObject startButton;
+    bool isStarted = false;
+    public UnityEngine.UI.Image progressBar;
+
+    public int roundCount = 7;
 
 
     public Camera mainCamera;
@@ -58,52 +64,58 @@ public class CardShuffle : MonoBehaviour {
     }
 
 	void Update () {
-
-        if (iterator < patternSize)
+        if (isStarted) 
         {
-            timer += Time.deltaTime;
-            if (timer >= lightTime)
+            if (iterator < patternSize)
             {
-                cards[pattern[iterator]].GetComponent<Light>().enabled = true;
-                timer = 0;
-                iterator++;
-            }
-        }
-        else if(iterator == patternSize){
-            timer += Time.deltaTime;
-            if (timer >= lightTime)
-            {
-                foreach (int num in pattern)
+                timer += Time.deltaTime;
+                if (timer >= lightTime)
                 {
-                    cards[num].GetComponent<Light>().enabled = false;
+                    cards[pattern[iterator]].GetComponent<Light>().enabled = true;
+                    timer = 0;
+                    iterator++;
                 }
-                timer = 0;
-                iterator++;
-				allowEdit = true;
-                Shuffle();
-
             }
+            else if(iterator == patternSize){
+                timer += Time.deltaTime;
+                if (timer >= lightTime)
+                {
+                    foreach (int num in pattern)
+                    {
+                        cards[num].GetComponent<Light>().enabled = false;
+                    }
+                    timer = 0;
+                    iterator++;
+				    allowEdit = true;
+                    Shuffle();
+
+                }
             
-		}
+		    }
 
 
-        if (Input.GetMouseButtonDown(0))
-        {
-			if(allowEdit)
-            	getClickedObjectPosition();
+            if (Input.GetMouseButtonDown(0))
+            {
+			    if(allowEdit)
+            	    getClickedObjectPosition();
 			
-        }
+            }
 
-        if(roundCount == 0)
-			score1.text = "Round 1";
-		if(roundCount == 1)
-			score2.text = "Round 2";
-		if(roundCount == 2)
-			score3.text = "Round 3";
-		if(roundCount == 3)
-			score4.text = "Round 4";
-		if(roundCount == 4)
-			score5.text = "Final Round";
+            if(roundCount == 0)
+			    score1.text = "Round 1";
+		    if(roundCount == 1)
+			    score2.text = "Round 2";
+		    if(roundCount == 2)
+			    score3.text = "Round 3";
+		    if(roundCount == 3)
+			    score4.text = "Round 4";
+            if (roundCount == 4)
+                score5.text = "Round 5";
+            if (roundCount == 5)
+                score6.text = "Round 6";
+            if(roundCount == 6)        
+			    score7.text = "Final Round";
+        }        
 
     }
 
@@ -213,6 +225,7 @@ public class CardShuffle : MonoBehaviour {
         int[] array = new int[2];
         int hits = 0;
         int misses = 0;
+        int nearHits = 0;
 
         for (int i = 0; i < patternSize; i++)
         {
@@ -225,6 +238,9 @@ public class CardShuffle : MonoBehaviour {
             }
             else
             {
+                if (originalPattern.Contains("Card" + solutionPattern[i])) {
+                    nearHits++;
+                }
                 misses++;
                 //Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
             }
@@ -236,23 +252,23 @@ public class CardShuffle : MonoBehaviour {
 
         roundCount++;
         Debug.Log("Round " + (roundCount) +": Hits = " + array[0] + " Misses = " + array[1]);
+        Debug.Log("There were " + nearHits + " item(s) that were correctly identified but were in an incorrect order");
         roundCount--;
 
-		if (roundCount >= 4) {
+		if (roundCount >= 6) {
 			completeTxt.text = "Complete";
 			completeCheck = true;
+           
 		}
 			
 		StartCoroutine (RoundShuffle());
-
-
-
-        
+                             
     }
 
     public void ButtonShuffle() {
 		if(allowEdit == true){
-			resetAndClear();
+            completeCheck = false;
+            resetAndClear();
 			Shuffle();
 			iterator = 0;
 			CreatePat();
@@ -262,9 +278,17 @@ public class CardShuffle : MonoBehaviour {
 			score3.text = "";
 			score4.text = "";
 			score5.text = "";
-			completeTxt.text = "";
-		}
+            score6.text = "";
+            score7.text = "";
+            completeTxt.text = "";
+            progressBar.fillAmount = 0;
+        }
         
+    }
+
+    public void StartButton() {
+            isStarted = true;
+            startButton.SetActive(false);
     }
 
 	IEnumerator RoundShuffle(){

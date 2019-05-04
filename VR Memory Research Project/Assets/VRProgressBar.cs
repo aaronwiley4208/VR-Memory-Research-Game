@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ProgressBar : MonoBehaviour
+public class VRProgressBar : MonoBehaviour
 {
     public GameObject cards;
     public Text text;
@@ -14,7 +14,7 @@ public class ProgressBar : MonoBehaviour
     int currentRound;
     bool ready = false;
 
-    
+
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +23,7 @@ public class ProgressBar : MonoBehaviour
         progressBar.GetComponent<UnityEngine.UI.Image>();
         progressBar.fillAmount = 0;
         percentage = 0.143f;
-        roundCount = cards.GetComponent<CardShuffle>().roundCount;
+        roundCount = cards.GetComponent<VRShuffle>().roundCount;
         //Debug.Log("Round Count: " + roundCount);
         //Debug.Log("Current Round: " + currentRound);
     }
@@ -34,8 +34,8 @@ public class ProgressBar : MonoBehaviour
         if (!ready)
         {
 
-            roundCount = cards.GetComponent<CardShuffle>().roundCount;
-            if(roundCount == 0)
+            roundCount = cards.GetComponent<VRShuffle>().roundCount;
+            if (roundCount == 0)
             {
                 currentRound = roundCount;
                 ready = true;
@@ -43,11 +43,11 @@ public class ProgressBar : MonoBehaviour
         }
         else
         {
-            roundCount = cards.GetComponent<CardShuffle>().roundCount;
+            roundCount = cards.GetComponent<VRShuffle>().roundCount;
 
             if (currentRound != roundCount)
             {
-                if(currentRound == 0)
+                if (currentRound == 0)
                 {
                     text.enabled = true;
                 }
@@ -62,7 +62,7 @@ public class ProgressBar : MonoBehaviour
         //Debug.Log("Current Round: " + currentRound);
         //Debug.Log("Current Fill Amount: " + progressBar.fillAmount);
 
-       
+
 
     }
 

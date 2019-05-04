@@ -35,10 +35,15 @@ public class VRShuffle : MonoBehaviour
     public Text score3;
     public Text score4;
     public Text score5;
+    public Text score6;
+    public Text score7;
     public Text completeTxt;
-    bool completeCheck = false;
+    public bool completeCheck = false;
 
-    public int roundCount = 5;
+    public GameObject startButton;
+    bool isStarted = false;
+
+    public int roundCount = 7;
 
 
     public Camera mainCamera;
@@ -60,78 +65,80 @@ public class VRShuffle : MonoBehaviour
         laser.material.color = Color.red;
 
 
-        /*foreach (int str in pattern) {
-            print(str);
-        }
-        foreach (string str in patNames)
-        {
-            print(str);
-        }*/
+        
     }
 
     void Update()
        {
 
-        
-
-        if (iterator < patternSize)
-        {
-            timer += Time.deltaTime;
-            if (timer >= lightTime)
+        if (isStarted) {
+            if (iterator < patternSize)
             {
-                cards[pattern[iterator]].GetComponent<Light>().enabled = true;
-                timer = 0;
-                iterator++;
-            }
-        }
-        else if (iterator == patternSize)
-        {
-            timer += Time.deltaTime;
-            if (timer >= lightTime)
-            {
-                foreach (int num in pattern)
+                timer += Time.deltaTime;
+                if (timer >= lightTime)
                 {
-                    cards[num].GetComponent<Light>().enabled = false;
+                    cards[pattern[iterator]].GetComponent<Light>().enabled = true;
+                    timer = 0;
+                    iterator++;
                 }
-                timer = 0;
-                iterator++;
-                allowEdit = true;
-                Shuffle();
+            }
+            else if (iterator == patternSize)
+            {
+                timer += Time.deltaTime;
+                if (timer >= lightTime)
+                {
+                    foreach (int num in pattern)
+                    {
+                        cards[num].GetComponent<Light>().enabled = false;
+                    }
+                    timer = 0;
+                    iterator++;
+                    allowEdit = true;
+                    Shuffle();
+
+                }
 
             }
+            if (grabPinch.GetStateDown(SteamVR_Input_Sources.Any)){
+                if (allowEdit)
+                    getClickedObjectPosition();
+            }
 
-        }
-        if (grabPinch.GetStateDown(SteamVR_Input_Sources.Any)){
-
-            if (allowEdit)
-                getClickedObjectPosition();
-
-        }
-
-        RaycastHit hit = new RaycastHit();
-        if (Physics.Raycast(controller.transform.position, controller.transform.forward, out hit)) {
-            laser.enabled = true;
-            laser.SetPosition(0, controller.transform.position);
-            laser.SetPosition(1, hit.point);
-        }
-        if (roundCount == 0)
-            score1.text = "Round 1";
-        if (roundCount == 1)
-            score2.text = "Round 2";
-        if (roundCount == 2)
-            score3.text = "Round 3";
-        if (roundCount == 3)
-            score4.text = "Round 4";
-        if (roundCount == 4)
-            score5.text = "Final Round";
-
-        /*if (Input.GetMouseButtonDown(0))
-        {
             
-
-        }*/
-
-
+            if (roundCount == 0)
+                score1.text = "Round 1";
+            if (roundCount == 1)
+                score2.text = "Round 2";
+            if (roundCount == 2)
+                score3.text = "Round 3";
+            if (roundCount == 3)
+                score4.text = "Round 4";
+            if (roundCount == 4)
+                score5.text = "Round 5";
+            if (roundCount == 5)
+                score6.text = "Round 6";
+            if (roundCount == 6)
+                score7.text = "Final Round";
+        }
+            RaycastHit hit = new RaycastHit();
+            if (Physics.Raycast(controller.transform.position, controller.transform.forward, out hit)) {
+                laser.enabled = true;
+                laser.SetPosition(0, controller.transform.position);
+                laser.SetPosition(1, hit.point);
+                if (hit.transform.gameObject.layer == 9)
+                {
+                    laser.material.color = Color.green;
+                }
+                else {
+                    laser.material.color = Color.red;
+                }
+                if (grabPinch.GetStateDown(SteamVR_Input_Sources.Any)){                
+                    if (hit.transform.name == "StartButton") {
+                        isStarted = true;
+                        startButton.SetActive(false);
+                    }
+                }
+            }
 
     }
 
@@ -238,9 +245,10 @@ public class VRShuffle : MonoBehaviour
                     //Debug.Log("Didn't hit a card.");
                 }
             }
-            if (hit.transform.name == "Button") {
+            if (hit.transform.name == "Button") {//reset
                 if (allowEdit == true)
                 {
+                    completeCheck = false;
                     resetAndClear();
                     Shuffle();
                     iterator = 0;
@@ -251,9 +259,12 @@ public class VRShuffle : MonoBehaviour
                     score3.text = "";
                     score4.text = "";
                     score5.text = "";
+                    score6.text = "";
+                    score7.text = "";
                     completeTxt.text = "";
                 }
             }
+            
         }
     }
 
@@ -264,6 +275,7 @@ public class VRShuffle : MonoBehaviour
         int[] array = new int[2];
         int hits = 0;
         int misses = 0;
+        int nearHits = 0;
 
         for (int i = 0; i < patternSize; i++)
         {
@@ -277,6 +289,10 @@ public class VRShuffle : MonoBehaviour
             }
             else
             {
+                if (originalPattern.Contains("Card" + solutionPattern[i]))
+                {
+                    nearHits++;
+                }
                 misses++;
                 //Debug.Log("OP " + originalPattern[i] + "|  SP: " + solutionPattern[i]);
             }
@@ -288,25 +304,19 @@ public class VRShuffle : MonoBehaviour
 
         roundCount++;
         Debug.Log("Round " + (roundCount) + ": Hits = " + array[0] + " Misses = " + array[1]);
+        Debug.Log("There were " + nearHits + " item(s) that were correctly identified but were in an incorrect order");
         roundCount--;
-        if (roundCount >= 4)
+        if (roundCount >= 6)
         {
             completeTxt.text = "Complete";
             completeCheck = true;
         }
 
         StartCoroutine(RoundShuffle());
-
-
-
-
+                     
     }
 
-    public void ButtonShuffle()
-    {
-        
-
-    }
+    
 
     IEnumerator RoundShuffle()
     {
