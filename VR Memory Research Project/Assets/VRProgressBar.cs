@@ -12,6 +12,7 @@ public class VRProgressBar : MonoBehaviour
 
     int roundCount;
     int currentRound;
+
     bool ready = false;
 
 
@@ -22,7 +23,7 @@ public class VRProgressBar : MonoBehaviour
         text.enabled = false;
         progressBar.GetComponent<UnityEngine.UI.Image>();
         progressBar.fillAmount = 0;
-        percentage = 0.143f;
+        percentage = (float)1 / (cards.GetComponent<VRShuffle>().maxRounds);
         roundCount = cards.GetComponent<VRShuffle>().roundCount;
         //Debug.Log("Round Count: " + roundCount);
         //Debug.Log("Current Round: " + currentRound);
@@ -57,6 +58,8 @@ public class VRProgressBar : MonoBehaviour
 
         }
 
+        if (cards.GetComponent<VRShuffle>().completeCheck)
+            increasePercentage();
 
         //Debug.Log("Round Count: " + roundCount);
         //Debug.Log("Current Round: " + currentRound);

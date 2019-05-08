@@ -38,8 +38,9 @@ public class CardShuffle : MonoBehaviour {
     bool isStarted = false;
     public UnityEngine.UI.Image progressBar;
 
-    public int roundCount = 7;
-
+    public int maxRounds;
+    public int roundCount;
+    Text[] scores;
 
     public Camera mainCamera;
 
@@ -54,13 +55,17 @@ public class CardShuffle : MonoBehaviour {
 		roundCount = 0;
         XRSettings.enabled = false;
 
-        /*foreach (int str in pattern) {
-            print(str);
-        }
-        foreach (string str in patNames)
-        {
-            print(str);
-        }*/
+        scores = new Text[maxRounds];
+
+        scores[0] = score1;
+        scores[1] = score2;
+        scores[2] = score3;
+        scores[3] = score4;
+        scores[4] = score5;
+        scores[5] = score6;
+        scores[6] = score7;
+
+        
     }
 
 	void Update () {
@@ -115,6 +120,8 @@ public class CardShuffle : MonoBehaviour {
                 score6.text = "Round 6";
             if(roundCount == 6)        
 			    score7.text = "Final Round";
+            if (roundCount == maxRounds -1)
+                scores[maxRounds - 1].text = "Final Round";
         }        
 
     }
@@ -255,7 +262,7 @@ public class CardShuffle : MonoBehaviour {
         Debug.Log("There were " + nearHits + " item(s) that were correctly identified but were in an incorrect order");
         roundCount--;
 
-		if (roundCount >= 6) {
+		if (roundCount >= maxRounds-1) {
 			completeTxt.text = "Complete";
 			completeCheck = true;
            

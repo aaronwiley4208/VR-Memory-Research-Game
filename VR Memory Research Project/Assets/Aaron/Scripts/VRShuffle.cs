@@ -43,7 +43,9 @@ public class VRShuffle : MonoBehaviour
     public GameObject startButton;
     bool isStarted = false;
 
-    public int roundCount = 7;
+    public int maxRounds;
+    public int roundCount;
+    Text[] scores;
 
 
     public Camera mainCamera;
@@ -64,8 +66,17 @@ public class VRShuffle : MonoBehaviour
         laser.SetColors(Color.red, Color.red);
         laser.material.color = Color.red;
 
+        scores = new Text[maxRounds];
 
-        
+        scores[0] = score1;
+        scores[1] = score2;
+        scores[2] = score3;
+        scores[3] = score4;
+        scores[4] = score5;
+        scores[5] = score6;
+        scores[6] = score7;
+
+
     }
 
     void Update()
@@ -119,6 +130,8 @@ public class VRShuffle : MonoBehaviour
                 score6.text = "Round 6";
             if (roundCount == 6)
                 score7.text = "Final Round";
+            if (roundCount == maxRounds - 1)
+                scores[maxRounds - 1].text = "Final Round";
         }
             RaycastHit hit = new RaycastHit();
             if (Physics.Raycast(controller.transform.position, controller.transform.forward, out hit)) {
@@ -306,7 +319,7 @@ public class VRShuffle : MonoBehaviour
         Debug.Log("Round " + (roundCount) + ": Hits = " + array[0] + " Misses = " + array[1]);
         Debug.Log("There were " + nearHits + " item(s) that were correctly identified but were in an incorrect order");
         roundCount--;
-        if (roundCount >= 6)
+        if (roundCount >= maxRounds - 1)
         {
             completeTxt.text = "Complete";
             completeCheck = true;

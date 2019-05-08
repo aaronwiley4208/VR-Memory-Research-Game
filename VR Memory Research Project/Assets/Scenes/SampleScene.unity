@@ -1474,7 +1474,8 @@ MonoBehaviour:
   completeCheck: 0
   startButton: {fileID: 773328691}
   progressBar: {fileID: 2006045509}
-  roundCount: 7
+  maxRounds: 3
+  roundCount: 0
   mainCamera: {fileID: 534669904}
 --- !u!1 &696318931
 GameObject:
